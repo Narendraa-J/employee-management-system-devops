@@ -11,7 +11,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building Employee Management System...'
+                sh 'docker compose build'
             }
         }
 
@@ -20,7 +20,6 @@ pipeline {
                 echo 'Running tests...'
             }
         }
-
     }
 
     post {
