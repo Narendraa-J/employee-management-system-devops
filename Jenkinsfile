@@ -1,18 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        API_URL = 'http://host.docker.internal:5001'
-    }
-
     stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Narendraa-J/employee-management-system-devops.git'
-            }
-        }
 
         stage('Install Dependencies') {
             steps {
@@ -28,7 +17,7 @@ pipeline {
 
         stage('API Test') {
             steps {
-                sh 'cd backend && npm test'
+                sh 'docker compose exec -T backend npm test'
             }
         }
 
