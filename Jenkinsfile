@@ -15,11 +15,17 @@ pipeline {
             }
         }
 
-        stage('Start Application') {
-            steps {
-                sh 'docker compose up -d'
+       stage('Start Application') {
+    steps {
+        sh '''
+            docker compose up -d || {
+                echo "===== MYSQL ERROR LOG ====="
+                docker compose logs mysql --tail=200
+                exit 1
             }
-        }
+        '''
+    }
+}
 
         stage('Initialize Database') {
             steps {
