@@ -2,6 +2,6 @@ USE employee_db;
 
 CREATE TABLE IF NOT EXISTS employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    dept_name VARCHAR(255) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    department VARCHAR(100) NOT NULL
 );
