@@ -5,30 +5,47 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/Narendraa-J/employee-management-system-devops.git'
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
+            steps {
+                sh 'cd backend && npm install'
+            }
+        }
+
+        stage('Start Application') {
+            steps {
+                sh 'docker compose up -d'
+            }
+        }
+
+        stage('API Test') {
+            steps {
+                sh 'cd backend && npm test'
+            }
+        }
+
+        stage('Docker Build') {
             steps {
                 sh 'docker compose build'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
             }
         }
     }
 
     post {
+        always {
+            sh 'docker compose down'
+        }
+
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'CI Pipeline completed successfully!'
         }
 
         failure {
-            echo 'Pipeline failed!'
+            echo 'CI Pipeline failed!'
         }
     }
 }
