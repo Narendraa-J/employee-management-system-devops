@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        API_URL = 'http://host.docker.internal:5001'
+    }
+
     stages {
 
         stage('Checkout') {
