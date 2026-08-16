@@ -8,6 +8,7 @@ const addEmployee = (req, res) => {
     db.query(sql, [name, department], (err, result) => {
 
         if (err) {
+            console.error("INSERT ERROR:", err);
             return res.status(500).json({
                 message: "Database Error",
                 error: err

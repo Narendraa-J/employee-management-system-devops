@@ -9,28 +9,55 @@ pipeline {
             }
         }
 
+        stage('Docker Build') {
+            steps {
+                sh 'docker compose build'
+            }
+        }
+
         stage('Start Application') {
             steps {
                 sh 'docker compose up -d'
             }
         }
 
-        stage('API Test') {
+        stage('Initialize Database') {
             steps {
-                sh 'docker compose exec -T backend npm test'
+                sh '''
+                    docker compose exec -T mysql mysql -uroot -proot123 -e "
+                    CREATE DATABASE IF NOT EXISTS employee_db;
+                    USE employee_db;
+
+                    CREATE TABLE IF NOT EXISTS employees (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(100) NOT NULL,
+                        department VARCHAR(100) NOT NULL
+                    );
+                    "
+                '''
             }
         }
 
-        stage('Docker Build') {
+        stage('API Test') {
             steps {
-                sh 'docker compose build'
+                sh '''
+                    docker compose exec -T backend npm test || {
+                        echo "===== BACKEND LOGS ====="
+                        docker compose logs backend --tail=100
+
+                        echo "===== MYSQL LOGS ====="
+                        docker compose logs mysql --tail=100
+
+                        exit 1
+                    }
+                '''
             }
         }
     }
 
     post {
         always {
-            sh 'docker compose down'
+            sh 'docker compose down -v'
         }
 
         success {
