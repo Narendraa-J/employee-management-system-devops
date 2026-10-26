@@ -6,7 +6,7 @@ async function loadEmployees() {
 
     console.log("Loading employees...");
 
-    const response = await fetch("http://localhost:5000/employees");
+    const response = await fetch("/employees");
 
     console.log(response);
 
@@ -44,7 +44,7 @@ loadEmployees();
 document.addEventListener("click", async (event) => {
     if (event.target.classList.contains("delete-btn")) {
         const id = event.target.dataset.id;
-        await fetch(`http://localhost:5000/employees/${id}`, {
+        await fetch(`/employees/${id}`, {
             method: "DELETE"
         });
         loadEmployees();
@@ -84,7 +84,7 @@ addButton.addEventListener("click", async () => {
 
         // ADD EMPLOYEE
 
-        await fetch("http://localhost:5000/employees", {
+        await fetch("/employees", {
 
             method: "POST",
 
@@ -103,7 +103,7 @@ addButton.addEventListener("click", async () => {
 
         // UPDATE EMPLOYEE
 
-        await fetch(`http://localhost:5000/employees/${editingEmployeeId}`, {
+        await fetch(`/employees/${editingEmployeeId}`, {
 
             method: "PUT",
 

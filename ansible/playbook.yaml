@@ -1,9 +1,13 @@
 ---
-- name: Configure Employee Management Server
+- name: Deploy Employee Management System
   hosts: webservers
   become: true
   gather_facts: true
-  
+
+  vars:
+    app_dir: /opt/employee-management
+    compose_file: docker-compose.prod.yml
+
   tasks:
     - name: Display operating system
       ansible.builtin.debug:
@@ -14,24 +18,44 @@
         name: docker
         state: present
 
-    - name: Start Docker service
+    - name: Start Docker
       ansible.builtin.systemd:
         name: docker
         state: started
         enabled: true
 
-    - name: Add ec2-user to docker group
-      ansible.builtin.user:
-        name: ec2-user
-        groups: docker
-        append: true
+    - name: Install Docker Compose plugin
+      ansible.builtin.file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: "0755"
 
-    - name: Verify Docker service
+    - name: Verify Docker Compose
       ansible.builtin.command:
-        cmd: docker --version
-      register: docker_version
+        cmd: docker compose version
       changed_when: false
 
-    - name: Display Docker version
-      ansible.builtin.debug:
-        msg: "{{ docker_version.stdout }}"
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: "0750"
+
+    - name: Copy production Compose file
+      ansible.builtin.copy:
+        src: ../docker-compose.prod.yml
+        dest: "{{ app_dir }}/docker-compose.prod.yml"
+        owner: ec2-user
+        group: ec2-user
+        mode: "0644"
+
+    - name: Verify deployment configuration
+      ansible.builtin.command:
+        cmd: docker compose -f docker-compose.prod.yml config --quiet
+        chdir: "{{ app_dir }}"
+      environment:
+        MYSQL_ROOT_PASSWORD: "{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }}"
+      changed_when: false
+      no_log: true
