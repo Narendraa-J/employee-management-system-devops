@@ -30,16 +30,35 @@ pipeline {
         stage('Initialize Database') {
             steps {
                 sh '''
-                    docker compose exec -T mysql mysql -uroot -proot123 -e "
-                    CREATE DATABASE IF NOT EXISTS employee_db;
-                    USE employee_db;
+                    echo "Waiting for MySQL to become ready..."
 
-                    CREATE TABLE IF NOT EXISTS employees (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        name VARCHAR(100) NOT NULL,
-                        department VARCHAR(100) NOT NULL
-                    );
-                    "
+                    for i in $(seq 1 30); do
+                        if docker compose exec -T mysql \
+                            mysqladmin ping -h 127.0.0.1 \
+                            -uroot -proot123 --silent; then
+                            break
+                        fi
+
+                        if [ "$i" -eq 30 ]; then
+                            echo "MySQL did not become ready"
+                            docker compose logs mysql --tail=200
+                            exit 1
+                        fi
+
+                        sleep 2
+                    done
+
+                    docker compose exec -T mysql \
+                        mysql -h 127.0.0.1 -uroot -proot123 -e "
+                        CREATE DATABASE IF NOT EXISTS employee_db;
+                        USE employee_db;
+
+                        CREATE TABLE IF NOT EXISTS employees (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(100) NOT NULL,
+                            department VARCHAR(100) NOT NULL
+                        );
+                        "
                 '''
             }
         }
