@@ -1,12 +1,26 @@
-# Environment variables
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
+*.pem
+*.key
 
 # Node dependencies
 node_modules/
 
-# Logs
+# Logs and OS files
 *.log
-
-# OS files
 .DS_Store
 Thumbs.db
+
+# Terraform local files
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+terraform/*.tfvars.json
+terraform/crash.log
+ansible/inventory.ini
+ansible/inventory.ini
